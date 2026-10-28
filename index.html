@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국립한국해양대학교 | 스마트 문서 압축 & 사진 변환 서비스</title>
+    <meta name="description" content="PDF, PPT, DOC, HWP 파일 압축 및 사진(JPG, PNG, WebP) 크기·포맷 변환 서비스를 제공하는 국립한국해양대학교 스마트 웹 앱입니다.">
+    <!-- Google Fonts: Inter & Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- JSZip Library & Canvas Confetti -->
+    <script src="assets/jszip.min.js"></script>
+    <script src="assets/confetti.min.js"></script>
+</head>
+<body class="light-mode">
+
+    <!-- Top Header Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="https://www.kmou.ac.kr" target="_blank" rel="noopener noreferrer" class="logo-link" title="국립한국해양대학교 홈페이지 바로가기 (새창)">
+                <img src="assets/kmou_logo.png" alt="국립한국해양대학교 로고" class="logo-img">
+            </a>
+            
+            <div class="nav-right">
+                <span class="service-badge"><i class="fa-solid fa-shield-halved"></i> 100% 안전 로컬 처리</span>
+                <button id="themeToggleBtn" class="icon-btn" title="화면 테마 변경">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Hero Container -->
+    <main class="main-content container">
+        
+        <!-- App Title Banner -->
+        <section class="hero-banner">
+            <div class="hero-badge">
+                <img src="assets/kmou_seal.png" alt="해양대 심볼" class="hero-seal">
+                <span>KMOU File Archiver & Image Resizer</span>
+            </div>
+            <h1 class="hero-title">스마트 파일 압축 & 사진 변환 서비스</h1>
+            <p class="hero-subtitle">
+                설치 없이 빠른 100% 로컬 보안 압축 및 사진 변환
+            </p>
+        </section>
+
+        <!-- Promotional Highlight Banner -->
+        <section class="promo-banner">
+            <div class="promo-item">
+                <i class="fa-solid fa-bolt promo-icon"></i>
+                <div>
+                    <strong>초고속·설치 무관</strong>
+                    <p>PC와 모바일에서 접속 즉시 사용</p>
+                </div>
+            </div>
+            <div class="promo-item">
+                <i class="fa-solid fa-lock promo-icon"></i>
+                <div>
+                    <strong>100% 프라이버시 보장</strong>
+                    <p>서버 업로드 없이 기기 내부에서 처리</p>
+                </div>
+            </div>
+            <div class="promo-item">
+                <i class="fa-solid fa-folder-open promo-icon"></i>
+                <div>
+                    <strong>내 컴퓨터 저장 위치 선택</strong>
+                    <p>저장 폴더를 직접 클릭하여 지정 가능</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab Navigation -->
+        <div class="app-tab-navigation">
+            <button id="tabBtnCompress" class="tab-nav-btn active" onclick="switchMainTab('compress')">
+                <i class="fa-solid fa-file-zipper"></i> 문서 & 파일 압축
+            </button>
+            <button id="tabBtnImage" class="tab-nav-btn" onclick="switchMainTab('image')">
+                <i class="fa-solid fa-file-image"></i> 사진 크기 & 포맷 변환
+            </button>
+        </div>
+
+        <!-- TAB 1: FILE COMPRESSION WORKSPACE -->
+        <div id="tabContentCompress" class="tab-content-panel active">
+            
+            <!-- Compact Supported Formats Badge Bar -->
+            <section class="format-showcase-compact">
+                <span class="fmt-label"><i class="fa-solid fa-file-circle-check"></i> 지원 파일:</span>
+                <div class="fmt-pills">
+                    <span class="fmt-pill">PDF</span>
+                    <span class="fmt-pill">HWP</span>
+                    <span class="fmt-pill">PPT</span>
+                    <span class="fmt-pill">DOC</span>
+                    <span class="fmt-pill">TXT</span>
+                    <span class="fmt-pill">JPG/PNG</span>
+                    <span class="fmt-pill highlight">모든 파일 포맷 (*.*)</span>
+                </div>
+            </section>
+
+            <!-- Dropzone Container -->
+            <section class="upload-section">
+                <div id="dropZone" class="drop-zone">
+                    <input type="file" id="fileInput" multiple style="display: none;">
+                    <input type="file" id="folderInput" webkitdirectory style="display: none;">
+                    
+                    <div class="drop-zone-content">
+                        <div class="drop-icon-wrapper">
+                            <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                        </div>
+                        <h2 class="drop-zone-title">압축할 파일/폴더를 끌어다 놓으세요</h2>
+                        <p class="drop-zone-desc">컴퓨터 및 모바일 기기 모두 지원합니다.</p>
+                        
+                        <div class="drop-actions">
+                            <button id="btnSelectFiles" class="btn btn-primary">
+                                <i class="fa-solid fa-plus"></i> 파일 추가하기
+                            </button>
+                            <button id="btnSelectFolder" class="btn btn-secondary">
+                                <i class="fa-solid fa-folder-plus"></i> 폴더 추가하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Selected File List & Customization Section -->
+            <section id="fileListSection" class="file-list-section card" style="display: none;">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-list-check"></i> 
+                        <span>선택한 파일 (<span id="totalFileCount">0</span>개)</span>
+                        <span id="totalFileSize" class="badge-size">0 KB</span>
+                    </div>
+                    <div class="card-header-actions">
+                        <button id="btnClearAll" class="btn-text danger"><i class="fa-solid fa-trash-can"></i> 전체 비우기</button>
+                    </div>
+                </div>
+
+                <div id="fileItemsContainer" class="file-items-container"></div>
+
+                <!-- Settings Panel (Requirement #1 & #2: Renamed button & removed naming rule) -->
+                <div class="compression-settings">
+                    <div class="setting-group">
+                        <label for="outputFileName"><i class="fa-solid fa-pen-to-square"></i> 저장 파일명 설정</label>
+                        <div class="input-with-suffix">
+                            <input type="text" id="outputFileName" class="text-input" placeholder="압축파일명 입력">
+                            <select id="archiveFormat" class="select-input">
+                                <option value="zip">.zip</option>
+                            </select>
+                        </div>
+                        <small class="help-text">단일 파일은 원본 파일명이 자동으로 설정됩니다.</small>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="compressionLevel"><i class="fa-solid fa-sliders"></i> 압축 수준 선택</label>
+                        <select id="compressionLevel" class="select-input">
+                            <option value="DEFLATE_6" selected>표준 압축 (빠르고 안정적)</option>
+                            <option value="DEFLATE_9">최대 압축 (고밀도 파일 용량 최소화)</option>
+                        </select>
+                        <small class="help-text">최대 압축 선택 시 알고리즘을 적용하여 용량을 최소화합니다.</small>
+                    </div>
+
+                    <div class="setting-group setting-group-full">
+                        <label for="btnPickDocFolder"><i class="fa-solid fa-folder-open"></i> 컴퓨터 저장 위치 지정</label>
+                        <div class="location-picker-wrapper">
+                            <button id="btnPickDocFolder" type="button" class="btn btn-secondary btn-location">
+                                <i class="fa-solid fa-folder-tree"></i> 저장 폴더 선택
+                            </button>
+                            <span id="docSelectedPathText" class="path-display-text">기본: 다운로드(Downloads) 폴더</span>
+                        </div>
+                        <small class="help-text">버튼을 클릭하여 컴퓨터 내 저장할 폴더를 직접 클릭해 지정할 수 있습니다.</small>
+                    </div>
+                </div>
+
+                <div class="action-footer">
+                    <button id="btnStartCompress" class="btn btn-large btn-accent">
+                        <i class="fa-solid fa-file-zipper"></i> 압축 시작 및 지정 폴더 저장
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 2: IMAGE RESIZER & FORMAT CONVERTER WORKSPACE -->
+        <div id="tabContentImage" class="tab-content-panel" style="display: none;">
+            
+            <section class="format-showcase-compact">
+                <span class="fmt-label"><i class="fa-solid fa-camera-retro"></i> 이미지 지원:</span>
+                <div class="fmt-pills">
+                    <span class="fmt-pill">JPG / JPEG</span>
+                    <span class="fmt-pill">PNG</span>
+                    <span class="fmt-pill">WebP</span>
+                    <span class="fmt-pill">GIF</span>
+                    <span class="fmt-pill">SVG / BMP</span>
+                </div>
+            </section>
+
+            <!-- Image Dropzone Container -->
+            <section class="upload-section">
+                <div id="imgDropZone" class="drop-zone image-drop-zone">
+                    <input type="file" id="imgFileInput" accept="image/*" multiple style="display: none;">
+                    
+                    <div class="drop-zone-content">
+                        <div class="drop-icon-wrapper img-icon-wrapper">
+                            <i class="fa-solid fa-images drop-icon"></i>
+                        </div>
+                        <h2 class="drop-zone-title">변환/축소할 사진 파일을 선택하세요</h2>
+                        <p class="drop-zone-desc">JPG, PNG, WebP 등 여러 이미지 사진을 추가하세요.</p>
+                        
+                        <div class="drop-actions">
+                            <button id="btnSelectImages" class="btn btn-primary btn-img-theme">
+                                <i class="fa-solid fa-file-image"></i> 사진 추가하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Selected Image Files Panel -->
+            <section id="imgListSection" class="file-list-section card" style="display: none;">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-images"></i> 
+                        <span>선택한 사진 (<span id="totalImgCount">0</span>장)</span>
+                        <span id="totalImgSize" class="badge-size">0 KB</span>
+                    </div>
+                    <div class="card-header-actions">
+                        <button id="btnClearImgAll" class="btn-text danger"><i class="fa-solid fa-trash-can"></i> 전체 비우기</button>
+                    </div>
+                </div>
+
+                <div id="imgItemsContainer" class="file-items-container"></div>
+
+                <!-- Integrated Image Processing Panel -->
+                <div class="compression-settings image-settings-panel">
+                    <div class="setting-group">
+                        <label for="imgTargetFormat"><i class="fa-solid fa-wand-magic-sparkles"></i> 변환할 사진 포맷</label>
+                        <select id="imgTargetFormat" class="select-input">
+                            <option value="jpeg" selected>JPG / JPEG (.jpg - 용량 축소 권장)</option>
+                            <option value="original">원본 포맷 유지</option>
+                            <option value="png">PNG (.png)</option>
+                            <option value="webp">WebP (.webp - 최신 고효율)</option>
+                        </select>
+                        <small class="help-text">선택한 포맷으로 확장자가 변환됩니다.</small>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="imgResizeRatio"><i class="fa-solid fa-compress"></i> 사진 크기 / 해상도 축소</label>
+                        <select id="imgResizeRatio" class="select-input">
+                            <option value="0.5" selected>50% 축소 (권장 - 용량 대폭 절감)</option>
+                            <option value="1.0">원본 크기 유지 (100%)</option>
+                            <option value="0.75">75% 축소</option>
+                            <option value="0.25">25% 축소 (소형)</option>
+                            <option value="max_1280">가로 1280px 이하로 축소</option>
+                            <option value="max_800">가로 800px 이하로 축소</option>
+                        </select>
+                        <small class="help-text">해상도를 조절해 파일 용량을 대폭 줄입니다.</small>
+                    </div>
+
+                    <div class="setting-group setting-group-full">
+                        <label for="btnPickImgFolder"><i class="fa-solid fa-folder-open"></i> 컴퓨터 저장 위치 지정</label>
+                        <div class="location-picker-wrapper">
+                            <button id="btnPickImgFolder" type="button" class="btn btn-secondary btn-location">
+                                <i class="fa-solid fa-folder-tree"></i> 저장 폴더 선택
+                            </button>
+                            <span id="imgSelectedPathText" class="path-display-text">기본: 다운로드(Downloads) 폴더</span>
+                        </div>
+                        <small class="help-text">버튼을 클릭하여 변환된 사진을 저장할 컴퓨터 내 폴더를 선택하세요.</small>
+                    </div>
+                </div>
+
+                <!-- Dual Action Buttons -->
+                <div class="action-footer dual-action-footer">
+                    <button id="btnStartImgDirect" class="btn btn-large btn-primary btn-img-theme">
+                        <i class="fa-solid fa-download"></i> 사진 변환 후 다운로드 (개별 파일)
+                    </button>
+                    <button id="btnStartImgZip" class="btn btn-large btn-accent">
+                        <i class="fa-solid fa-file-zipper"></i> 사진 변환 + ZIP 압축 다운로드
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- SHARED PROGRESS MODAL SECTION -->
+        <section id="progressSection" class="progress-section card" style="display: none;">
+            <div class="progress-header">
+                <div class="progress-title-box">
+                    <div class="spinner"></div>
+                    <div>
+                        <h3 id="progressTitle">처리 진행 중...</h3>
+                        <p id="progressSubStatus" class="progress-sub">변환 및 데이터 처리를 진행하고 있습니다.</p>
+                    </div>
+                </div>
+                <div id="progressPercent" class="progress-percent">0%</div>
+            </div>
+
+            <div class="progress-bar-track">
+                <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+
+            <div class="progress-details">
+                <span id="progressFileDetail"><i class="fa-solid fa-file"></i> 처리 파일: 0 / 0</span>
+                <span id="progressBytesDetail"><i class="fa-solid fa-database"></i> 0 MB / 0 MB</span>
+            </div>
+        </section>
+
+        <!-- SHARED COMPLETION RESULT SECTION -->
+        <section id="resultSection" class="result-section card success-card" style="display: none;">
+            <div class="result-content">
+                <div class="success-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2>작업 완료! 지정한 폴더에 파일 저장됨</h2>
+                <p id="resultLocationNotice" class="result-desc">
+                    변환/압축된 파일이 선택하신 폴더에 성공적으로 저장되었습니다.
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">원본 총 용량</span>
+                        <span id="statOriginalSize" class="stat-value">0 MB</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">작업 후 총 용량</span>
+                        <span id="statCompressedSize" class="stat-value highlight">0 MB</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">용량 절감율</span>
+                        <span id="statRatio" class="stat-value accent">0%</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">저장 형태</span>
+                        <span id="statFileName" class="stat-value filename">output.zip</span>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button id="btnRedownload" class="btn btn-primary">
+                        <i class="fa-solid fa-download"></i> 다시 다운로드
+                    </button>
+                    <button id="btnReset" class="btn btn-outline">
+                        <i class="fa-solid fa-rotate-left"></i> 새로 시작하기
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enlarged How to Use Section with Screenshot Click Markers & Sub-explanations (Requirement #3 & #4) -->
+        <section class="guide-section card">
+            <div class="guide-header">
+                <h2><i class="fa-solid fa-circle-question"></i> 간편한 사용 방법 안내</h2>
+            </div>
+
+            <div class="steps-container-large">
+                
+                <!-- Step 1 Card -->
+                <div class="step-card-large">
+                    <div class="step-header-box">
+                        <span class="step-num">STEP 1</span>
+                        <h3 class="step-title">파일 추가 버튼 클릭 또는 드래그</h3>
+                    </div>
+                    <p class="step-desc">화면 중앙의 <strong>[+ 파일 추가하기]</strong> 버튼을 누르거나 파일들을 끌어다 놓으세요.</p>
+                    <div class="step-img-wrapper-large">
+                        <img src="assets/guide_step1.png" alt="1단계 파일 추가 클릭 위치" class="step-screenshot-large">
+                        <div class="target-marker step1-target" title="여기 클릭!">
+                            <span class="pulse-ring"></span>
+                            <i class="fa-solid fa-hand-pointer"></i> ① 파일 추가 클릭
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 Card with Requirement #4 Sub-explanations Box -->
+                <div class="step-card-large">
+                    <div class="step-header-box">
+                        <span class="step-num">STEP 2</span>
+                        <h3 class="step-title">옵션 설정 및 압축 시작 클릭</h3>
+                    </div>
+                    <p class="step-desc">파일 목록 아래의 세부 옵션을 설정한 후 <strong>[압축 시작 및 지정 폴더 저장]</strong> 버튼을 클릭합니다.</p>
+                    
+                    <!-- Requirement #4 Sub-explanations Box under Step 2 -->
+                    <div class="sub-explanation-box">
+                        <div class="sub-exp-title"><i class="fa-solid fa-circle-info"></i> 세부 옵션 설정 방법 가이드:</div>
+                        <ul class="sub-exp-list">
+                            <li>
+                                <strong>📝 파일명 설정:</strong> 
+                                저장할 압축 파일의 이름을 입력창에 직접 수정하거나 기본 자동 생성 이름을 사용할 수 있습니다.
+                            </li>
+                            <li>
+                                <strong>⚡ 압축 수준 선택:</strong> 
+                                <strong>[표준 압축]</strong>(빠르고 안정적) 및 <strong>[최대 압축]</strong>(고밀도 알고리즘 적용으로 파일 용량 최소화) 중 선택합니다.
+                            </li>
+                            <li>
+                                <strong>📂 저장 위치 지정:</strong> 
+                                <strong>[저장 폴더 선택]</strong> 버튼을 클릭하면 컴퓨터 내 파일 탐색기가 열려 원하는 저장 폴더를 클릭해 직접 지정할 수 있습니다.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="step-img-wrapper-large">
+                        <img src="assets/guide_step2.png" alt="2단계 옵션 설정 및 압축 시작 클릭 위치" class="step-screenshot-large">
+                        <div class="target-marker step2-target" title="여기 클릭!">
+                            <span class="pulse-ring"></span>
+                            <i class="fa-solid fa-hand-pointer"></i> ② 압축 시작 클릭
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 Card -->
+                <div class="step-card-large">
+                    <div class="step-header-box">
+                        <span class="step-num">STEP 3</span>
+                        <h3 class="step-title">자동 저장 확인 및 압축 완료</h3>
+                    </div>
+                    <p class="step-desc">진행률 100% 달성 시 파일이 내 컴퓨터/모바일 단말기로 <strong>자동 저장</strong>됩니다.</p>
+                    <div class="step-img-wrapper-large">
+                        <img src="assets/guide_step3.png" alt="3단계 압축 완료 화면" class="step-screenshot-large">
+                        <div class="target-marker step3-target" title="자동 저장 완료">
+                            <span class="pulse-ring success"></span>
+                            <i class="fa-solid fa-circle-check"></i> ③ 저장 완료
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-info">
+                <a href="https://www.kmou.ac.kr" target="_blank" rel="noopener noreferrer" class="footer-logo-link">
+                    <img src="assets/kmou_logo.png" alt="국립한국해양대학교 로고" class="footer-logo">
+                </a>
+                <p>국립한국해양대학교 (Korea Maritime & Ocean University)</p>
+                <p class="copyright">© 2026 Korea Maritime & Ocean University. All rights reserved.</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://www.kmou.ac.kr" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-globe"></i> 대학 홈페이지</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
